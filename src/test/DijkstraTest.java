@@ -8,7 +8,6 @@ import algorithms.Dijkstra;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Random;
 
 /**
  * A set of tests covering all implementations of the Dijkstra algorithm.
@@ -54,6 +53,16 @@ public class DijkstraTest {
         dist = Dijkstra.trivialDijkstraTwo(g2, s2);
         Assert.assertArrayEquals(dist, d2);
         dist = Dijkstra.trivialDijkstraTwo(g3, s3);
+        Assert.assertArrayEquals(dist, d3);
+    }
+
+    @Test
+    public void testBinaryMinDijkstra() {
+        int[] dist = Dijkstra.binaryMinHeapDijkstra(g1, s1);
+        Assert.assertArrayEquals(dist, d1);
+        dist = Dijkstra.binaryMinHeapDijkstra(g2, s2);
+        Assert.assertArrayEquals(dist, d2);
+        dist = Dijkstra.binaryMinHeapDijkstra(g3, s3);
         Assert.assertArrayEquals(dist, d3);
     }
 

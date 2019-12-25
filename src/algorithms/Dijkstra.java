@@ -4,6 +4,9 @@
 
 package algorithms;
 
+import datastructures.Heap;
+
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,12 +16,51 @@ import java.util.List;
 public class Dijkstra {
 
     /**
+     * Dijkstra's algorithm, implemented with a binary minimum heap.
+     * @param g the graph, in adjacency matrix form
+     * @param s the source vertex
+     * @return an integer array where int[x] is the vertex x's distance from s
+     */
+    public static int[] binaryMinHeapDijkstra(int[][] g, int s) {
+        LinkedList vertices = new LinkedList<Vertex>();
+        HashSet explored = new HashSet<Integer>();
+        Heap h = new Heap<Vertex>(Vertex.class);
+        int[] dist = new int[g.length];
+
+        for (int i = 0; i < g.length; i++) {
+            Vertex v = new Vertex(i);
+            vertices.add(v);
+            v.setDijkstraScore(i != s ? Integer.MAX_VALUE : 0);
+            h.insert(v);
+        }
+
+        while (h.getElementCount() != 0) {
+            Vertex min = (Vertex) h.extractMin();
+            explored.add(min.getVertexNum());
+            dist[min.getVertexNum()] = min.getDijkstraScore();
+
+            for (int n = 0; n < g[min.getVertexNum()].length; n++) {
+                // not a real neighbor or not an edge crossing the frontier
+                if (g[min.getVertexNum()][n] == -1 || explored.contains(n)) continue;
+
+                Vertex neighbor = (Vertex) vertices.get(n);
+                h.delete(neighbor);
+                int dScore = dist[min.getVertexNum()] + g[min.getVertexNum()][n];
+                neighbor.setDijkstraScore(Math.min(dScore, neighbor.getDijkstraScore()));
+                h.insert(neighbor);
+            }
+        }
+
+        return dist;
+    }
+
+    /**
      * Dijkstra's algorithm, computes the single source shorted path distance
      * for a directed graph with non-negative edge lengths.
      * @complexity O(n^2 + m)
      * @param s the souce vertex
      * @param g the graph, in adjacency matrix form
-     * @return and integer array where int[x] is the vertex x's distance from s
+     * @return an integer array where int[x] is the vertex x's distance from s
      */
     public static int[] trivialDijkstra(int[][] g, int s) {
         int[] dist = new int[g.length];
@@ -64,7 +106,7 @@ public class Dijkstra {
      * @omplexity O(mn)
      * @param g a 2D integer array corresponding to the matrix representation of the graph
      * @param s the source vertex
-     * @return
+     * @return an integer array where int[x] is the vertex x's distance from s
      */
     public static int[] trivialDijkstraTwo(int[][] g, int s) {
         int[] dist = new int[g.length];
@@ -110,5 +152,31 @@ public class Dijkstra {
         }
 
         return least;
+    }
+
+    /**
+     * A Comparable class to allow Vertices to be placed into a heap
+     * for binaryMinDijkstra
+     */
+    private static class Vertex implements Comparable<Vertex> {
+
+        /** This vertex's index. */
+        private final int vertexNum;
+        /** This vertex's dijkstra score (it's currently known minimum distance) */
+        private int dijkstraScore;
+
+        public Vertex(int v) {
+            vertexNum = v;
+        }
+
+        public int getVertexNum() { return vertexNum; }
+        public int getDijkstraScore() { return dijkstraScore; }
+
+        public void setDijkstraScore(int d) { dijkstraScore = d; }
+
+        @Override
+        public int compareTo(Vertex vertex) {
+            return dijkstraScore - vertex.dijkstraScore;
+        }
     }
 }
